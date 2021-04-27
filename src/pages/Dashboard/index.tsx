@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 
-import { View, Image } from 'react-native';
+import { View, Image, Alert } from 'react-native';
 
 import formatValue from '../../utils/formatValue';
 import { useCart } from '../../hooks/cart';
@@ -35,15 +35,37 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadProducts(): Promise<void> {
-      // TODO
+      try {
+        const response = await api.get<Product[]>('/products');
+        const newProducts: Product[] = response.data;
+        setProducts(newProducts);
+      } catch (e) {
+        Alert.alert(
+          'Erro no acesso ao servidor.',
+          'Sua lista não pode ser carregada',
+        );
+        console.log(e);
+      }
     }
 
     loadProducts();
   }, []);
 
-  function handleAddToCart(item: Product): void {
-    // TODO
-  }
+  const handleAddToCart = useCallback(
+    async (item: Product) => {
+      // TODO
+      try {
+        await addToCart(item);
+      } catch (e) {
+        Alert.alert(
+          'Erro no acesso ao servidor.',
+          'Seu item não pode ser adicionado ao carrinho.',
+        );
+        console.log(e);
+      }
+    },
+    [addToCart],
+  );
 
   return (
     <Container>

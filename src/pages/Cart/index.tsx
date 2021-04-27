@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
+
+import { useCart } from '../../hooks/cart';
 
 import {
   Container,
@@ -23,8 +25,6 @@ import {
   SubtotalValue,
 } from './styles';
 
-import { useCart } from '../../hooks/cart';
-
 import formatValue from '../../utils/formatValue';
 
 interface Product {
@@ -38,24 +38,67 @@ interface Product {
 const Cart: React.FC = () => {
   const { increment, decrement, products } = useCart();
 
-  function handleIncrement(id: string): void {
-    // TODO
-  }
+  const handleIncrement = useCallback(
+    async (id: string) => {
+      // TODO
+      try {
+        await increment(id);
+      } catch (e) {
+        Alert.alert(
+          'Erro no acesso ao servidor.',
+          'Seu item não pode ser adicionado ao carrinho.',
+        );
+        console.log(e);
+      }
+    },
+    [increment],
+  );
 
-  function handleDecrement(id: string): void {
-    // TODO
-  }
+  const handleDecrement = useCallback(
+    async (id: string) => {
+      // TODO
+      try {
+        await decrement(id);
+      } catch (e) {
+        Alert.alert(
+          'Erro no acesso ao servidor.',
+          'Seu item não pode ser adicionado ao carrinho.',
+        );
+        console.log(e);
+      }
+    },
+    [decrement],
+  );
 
   const cartTotal = useMemo(() => {
+    console.log(products);
     // TODO RETURN THE SUM OF THE QUANTITY OF THE PRODUCTS IN THE CART
-
-    return formatValue(0);
+    const { price } = products.reduce(
+      (acumulator, product) => {
+        const p = acumulator.price + product.quantity * product.price;
+        return { price: p };
+      },
+      {
+        price: 0,
+      },
+    );
+    console.log(price);
+    return formatValue(price);
   }, [products]);
 
   const totalItensInCart = useMemo(() => {
     // TODO RETURN THE SUM OF THE QUANTITY OF THE PRODUCTS IN THE CART
-
-    return 0;
+    const { quantity } = products.reduce(
+      (acumulator, product) => {
+        const q = acumulator.quantity + product.quantity;
+        return { quantity: q };
+      },
+      {
+        quantity: 0,
+      },
+    );
+    console.log(quantity);
+    return quantity;
   }, [products]);
 
   return (
